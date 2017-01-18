@@ -39,3 +39,4 @@ Defaults to: 192.168.0.254
 
 $pridns - Primary DNS for the ilo-interface
 Defaults to: 8.8.8.8
+
