@@ -1,0 +1,32 @@
+# This file is being maintained by Puppet.
+# DO NOT EDIT
+
+#!/bin/bash
+
+if [ -f /sbin/hponcfg ]
+   then
+
+        /sbin/hponcfg -w /tmp/ilo.tmp
+
+	ilo_hostname=$(egrep DNS_NAME /tmp/ilo.tmp | awk -F '["|"]' '{print $2}' | awk -F'.' '{print $1}')
+	ilo_dhcp=$(egrep DHCP_ENABLE /tmp/ilo.tmp | awk -F '["|"]' '{print $2}')
+	ilo_staticip=$(egrep -m 1 IP_ADDRESS /tmp/ilo.tmp | awk -F '["|"]' '{print $2}')
+	ilo_netmask=$( egrep SUBNET /tmp/ilo.tmp | awk -F '["|"]' '{print $2}')
+	ilo_gateway=$(egrep GATEWAY_IP_ADDRESS /tmp/ilo.tmp | awk -F '["|"]' '{print $2}')
+	ilo_dns1=$(egrep PRIM_DNS_SERVER /tmp/ilo.tmp | awk -F '["|"]' '{print $2}')
+
+        echo "ilo_hostname=$ilo_hostname" > /etc/facter/facts.d/ilo_inventory.txt
+	echo "ilo_dhcp=$ilo_dhcp" >> /etc/facter/facts.d/ilo_inventory.txt
+	echo "ilo_staticip=$ilo_staticip" >> /etc/facter/facts.d/ilo_inventory.txt
+	echo "ilo_netmask=$ilo_netmask" >> /etc/facter/facts.d/ilo_inventory.txt
+	echo "ilo_gateway=$ilo_gateway" >> /etc/facter/facts.d/ilo_inventory.txt
+	echo "ilo_dns1=$ilo_dns1" >> /etc/facter/facts.d/ilo_inventory.txt
+
+        rm -rf /tmp/ilo.tmp
+
+        exit 0
+
+else
+        exit 1
+fi
+

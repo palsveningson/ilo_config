@@ -1,0 +1,9 @@
+#!/bin/bash
+
+delay=$1
+shift
+
+( sleep "$delay" ; "$@" ) < /dev/null >& /dev/null &
+disown
+
+exit 0
