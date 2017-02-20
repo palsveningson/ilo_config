@@ -75,6 +75,43 @@ $scriptpath   =   $ilo_config::params::scriptpath,
       command => "$scriptpath/ilo_delay.sh 20s rm -rf $scriptpath/static.xml",
     }
    }
+  if $iloname != $::ilo_hostname {
+   if $dhcp == 'Y' {
+    file {"$scriptpath/dhcp.xml":
+      ensure  => file,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0744',
+      content => template('ilo_config/dhcp.erb'),
+      before  => EXEC['set-dhcp']
+    }
+    exec {'set-dhcp':
+      command => "/usr/bin/nohup hponcfg -f $scriptpath/dhcp.xml > /dev/null 2>&1 &",
+      path    => '/sbin/',
+      before  => EXEC['del-dhcp'],
+    }
+    exec {'del-dhcp':
+      command => "$scriptpath/ilo_delay.sh 20s rm -rf $scriptpath/dhcp.xml",
+    }
+   }
+   elsif $dhcp == 'N' {
+    file {"$scriptpath/static.xml":
+      ensure  => file,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0744',
+      content => template('ilo_config/static.erb'),
+      before  => EXEC['set-static'],
+   }
+    exec {'set-static':
+      command => "hponcfg -f $scriptpath/static.xml &>/dev/null &disown",
+      path    => 'sbin',
+      before  => EXEC['del-static'],
+    }
+    exec {'del-static':
+      command => "$scriptpath/ilo_delay.sh 20s rm -rf $scriptpath/static.xml",
+    }
+   }
   }
  }
 }
